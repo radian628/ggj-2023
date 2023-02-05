@@ -1,0 +1,44 @@
+.lc-sandbox {
+  position: fixed;
+  bottom: -30vh;
+  left: 0;
+  width: 100vw;
+  height: 30vh;
+  background-color: #444444;
+  transition: bottom 0.1s;
+}
+
+.lc-sandbox:hover {
+  bottom: 0;
+}
+
+.lc-sandbox li {
+  list-style: none;
+}
+
+.lc-sandbox-beta-reduction-line {
+  font-size: 18px;
+  font-family: "Courier New", Courier, monospace;
+  color: white;
+  margin-bottom: 5px;
+  border-bottom: 1px solid #777777;
+  padding-bottom: 5px;
+}
+
+.lc-sandbox-pull-up {
+  position: absolute;
+  top: -30px;
+  width: 100px;
+  height: 30px;
+  border-top-left-radius: 15px;
+  border-top-right-radius: 15px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #444444;
+  color: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 40px;
+  padding-top: 6px;
+}

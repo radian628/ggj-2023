@@ -7,7 +7,12 @@ import { getSExprTree } from "./lambda-calculus/debug-output";
 import { getNum } from "./lambda-calculus/church-numerals";
 import { CodeEditor } from "./lambda-calculus/CodeEditor";
 import { Level1 } from "./levels/Level1";
-import { Level2 } from "./levels/Level2";
+import { lcUnsafeEval, Level2 } from "./levels/Level2";
+import { Level3 } from "./levels/Level3";
+import { Level4 } from "./levels/Level4";
+import { Level5 } from "./levels/Level5";
+import { Level6 } from "./levels/Level6";
+import { Sandbox } from "./sandbox/Sandbox";
 
 const TEST1 = `(\\ f x (f (f (\\ a b c (f x)))))`;
 const TEST2 = `(a b c d)`;
@@ -44,7 +49,13 @@ let parsedResult = parse(lex(ANOTHERTEST));
 
 //   console.log("calcualted number: ", getNum(p));
 // }
+
 function App() {
+  const [unlocked, setUnlocked] = useState(5);
+
+  const advance = (thisLevel: number) => () =>
+    setUnlocked(Math.max(unlocked, thisLevel + 1));
+
   return (
     <div className="App">
       <section className="title-page">
@@ -52,8 +63,14 @@ function App() {
         <span className="subtitle">The Roots of Computation</span>
         <span className="subsubtitle">A game about Lambda Calculus</span>
       </section>
-      <Level1></Level1>
-      <Level2></Level2>
+      <Level1 onComplete={advance(1)}></Level1>
+      {unlocked >= 2 && <Level2 onComplete={advance(2)}></Level2>}
+      {unlocked >= 3 && <Level3 onComplete={advance(3)}></Level3>}
+      {unlocked >= 4 && <Level4 onComplete={advance(4)}></Level4>}
+      {unlocked >= 5 && <Level5 onComplete={advance(5)}></Level5>}
+      {unlocked >= 6 && <Level6 onComplete={advance(6)}></Level6>}
+
+      {unlocked >= 5 && <Sandbox></Sandbox>}
     </div>
   );
 }

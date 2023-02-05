@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { getNum } from "../lambda-calculus/church-numerals";
-import { CodeEditor } from "../lambda-calculus/CodeEditor";
+import { CodeEditor, Colorized } from "../lambda-calculus/CodeEditor";
 import { getSExprTree } from "../lambda-calculus/debug-output";
 import { alphaReduce, betaReduce } from "../lambda-calculus/interpreter";
 import { curry, lex, parse } from "../lambda-calculus/parser";
@@ -32,33 +32,36 @@ export function lcUnsafeNormalize(str: string): string {
 export function LCIOPair(props: { children: string }) {
   return (
     <div className="lc-example">
-      {props.children} = {lcUnsafeEval(props.children)}
+      {<Colorized>{props.children}</Colorized>} ={" "}
+      {<Colorized>{lcUnsafeEval(props.children)}</Colorized>}
     </div>
   );
 }
 
-export function Level2() {
+export function Level2(props: { onComplete: () => void }) {
   const [code, setCode] = useState("?");
 
   const parsedCode = parse(lex(code));
 
-  let q = `((\\ p q (p (q q))) x y)`;
+  let q = `((\\ a (a (a a))) (x y))`;
   let a = lcUnsafeEval(q);
-  console.log(a);
 
   let completed = a == lcUnsafeNormalize(code);
+
+  if (completed) props.onComplete();
 
   return (
     <section
       className={completed ? "game-page completed-game-page" : "game-page"}
     >
       <div className="spacer"></div>
+      <p className="note">Each line is entirely self-contained.</p>
       <LCIOPair>((\ a a) b)</LCIOPair>
       <LCIOPair>((\ a (a a)) b)</LCIOPair>
       <LCIOPair>((\ a (a a)) (p q))</LCIOPair>
-      <LCIOPair>((\ x y z (x (y z))) a b c)</LCIOPair>
       <div className="lc-example">
-        {q} = <CodeEditor val={code} setVal={setCode}></CodeEditor>
+        <Colorized>{q}</Colorized> ={" "}
+        <CodeEditor val={code} setVal={setCode}></CodeEditor>
       </div>
       <div className="game-page-continue">▼</div>
     </section>

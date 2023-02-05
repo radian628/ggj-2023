@@ -139,7 +139,12 @@ export function betaReduce(node: ASTNode): { node: ASTNode; done: boolean } {
               //     top.output === output,
               //     top.substitutions
               //   );
-              if (Array.isArray(top.output)) top.output.push(...a);
+              if (Array.isArray(a)) {
+                //@ts-ignore
+                top.output.push(...a);
+              } else {
+                top.output = a;
+              }
             }
           );
           top.index = 2;
@@ -153,8 +158,12 @@ export function betaReduce(node: ASTNode): { node: ASTNode; done: boolean } {
           const node = top.node[top.index];
 
           pushStack(node, top.substitutions, (a) => {
-            //@ts-ignore
-            top.output.push(a);
+            if (Array.isArray(top.output)) {
+              //@ts-ignore
+              top.output.push(a);
+            } else {
+              top.output = a;
+            }
           });
 
           top.index++;

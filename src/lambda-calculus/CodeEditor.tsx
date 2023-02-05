@@ -1,10 +1,13 @@
-import { useEffect, useRef } from "react";
+import React, { HTMLAttributes, useEffect, useRef } from "react";
 import { useEditable } from "use-editable";
+import { removeUndefinedProperties } from "../sandbox/Sandbox";
 
-export function CodeEditor(props: {
-  val: string;
-  setVal: (s: string) => void;
-}) {
+export function CodeEditor(
+  props: {
+    val: string;
+    setVal: (s: string) => void;
+  } & HTMLAttributes<HTMLSpanElement>
+) {
   const editorRef = useRef<HTMLSpanElement>(null);
   useEditable(editorRef, (val) => {
     props.setVal(val);
@@ -13,9 +16,23 @@ export function CodeEditor(props: {
   });
 
   return (
-    <span ref={editorRef} className="lc-input">
+    <span
+      ref={editorRef}
+      className="lc-input"
+      {...removeUndefinedProperties({
+        props,
+        val: undefined,
+        setVal: undefined,
+      })}
+    >
       {colorizeBracketPairs(props.val)}
     </span>
+  );
+}
+
+export function Colorized(props: { children: string }) {
+  return (
+    <React.Fragment>{colorizeBracketPairs(props.children)}</React.Fragment>
   );
 }
 
@@ -40,7 +57,7 @@ export function colorizeBracketPairs(str: string): (JSX.Element | string)[] {
           key={key}
           className={`bracket${
             nestingLevel >= 0
-              ? (nestingLevel + (s == ")" ? 1 : 0)) % 4
+              ? (nestingLevel + (s == ")" ? 1 : 0)) % 3
               : "-invalid"
           }`}
         >
