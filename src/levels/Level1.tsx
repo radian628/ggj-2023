@@ -35,6 +35,10 @@ export function Level1(props: { onComplete: () => void }) {
       <div className="lc-example">
         <Colorized>(\ f x (f (f x))) = 2</Colorized>
       </div>
+      {/* <p className="note">Note: Variable names are arbitrary.</p>
+      <div className="lc-example">
+        <Colorized>(\ f x (f x)) = (\ a b (a b)) = (\ m n (m n)) = 1</Colorized>
+      </div> */}
       <div className="lc-example">
         <CodeEditor val={code} setVal={setCode}></CodeEditor> = 3
       </div>

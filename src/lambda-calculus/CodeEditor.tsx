@@ -20,7 +20,7 @@ export function CodeEditor(
       ref={editorRef}
       className="lc-input"
       {...removeUndefinedProperties({
-        props,
+        ...props,
         val: undefined,
         setVal: undefined,
       })}

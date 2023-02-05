@@ -71,7 +71,6 @@ export function Level5(props: { onComplete: () => void }) {
       className={completed ? "game-page completed-game-page" : "game-page"}
     >
       <div className="spacer"></div>
-      <p className="note">Sandbox unlocked! Check the bottom of your screen.</p>
       <div className="lc-example">SUCC n = n + 1</div>
       <p className="note">For example...</p>
       <div className="lc-example">
@@ -89,6 +88,9 @@ export function Level5(props: { onComplete: () => void }) {
       <div className="lc-example">
         SUCC = <CodeEditor val={code} setVal={setCode}></CodeEditor>
       </div>
+      <p className="note">
+        Note: Sandbox unlocked! Check the bottom of your screen.
+      </p>
       <div className="game-page-continue">▼</div>
     </section>
   );

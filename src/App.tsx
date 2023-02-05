@@ -51,7 +51,7 @@ let parsedResult = parse(lex(ANOTHERTEST));
 // }
 
 function App() {
-  const [unlocked, setUnlocked] = useState(5);
+  const [unlocked, setUnlocked] = useState(1);
 
   const advance = (thisLevel: number) => () =>
     setUnlocked(Math.max(unlocked, thisLevel + 1));

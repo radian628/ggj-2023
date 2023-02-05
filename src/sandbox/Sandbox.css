@@ -4,7 +4,7 @@
   left: 0;
   width: 100vw;
   height: 30vh;
-  background-color: #444444;
+  background-color: #363636;
   transition: bottom 0.1s;
 }
 
@@ -27,18 +27,30 @@
 
 .lc-sandbox-pull-up {
   position: absolute;
-  top: -30px;
+  top: -36px;
   width: 100px;
   height: 30px;
   border-top-left-radius: 15px;
   border-top-right-radius: 15px;
   left: 50%;
   transform: translateX(-50%);
-  background-color: #444444;
+  background-color: #363636;
   color: white;
   display: flex;
   justify-content: center;
   align-items: center;
   font-size: 40px;
   padding-top: 6px;
+}
+
+.lc-sandbox-input {
+  width: 100%;
+  border-radius: 0;
+  background-color: #404040;
+}
+
+.lc-sandbox-input:focus {
+  width: 100%;
+  border-radius: 0;
+  background-color: #494949;
 }

@@ -59,11 +59,15 @@ export function Sandbox() {
   return (
     <div className="lc-sandbox">
       <div className="lc-sandbox-pull-up">^</div>
-      <CodeEditor val={code} setVal={setCode}></CodeEditor>
+      <CodeEditor
+        className="lc-input lc-sandbox-input"
+        val={code}
+        setVal={setCode}
+      ></CodeEditor>
       <ul className="lc-sandbox-eval-list">
         {betaReductionSteps.map((brs, i) => (
           <li className="lc-sandbox-beta-reduction-line">
-            <Colorized key={i}>{getSExprTree(brs)}</Colorized>
+            = <Colorized key={i}>{getSExprTree(brs)}</Colorized>
           </li>
         ))}
       </ul>
