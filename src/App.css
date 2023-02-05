@@ -1,0 +1,125 @@
+body {
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-snap-type: y proximity;
+}
+
+.title-page {
+  background-color: #67c384;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  scroll-snap-align: start;
+}
+
+h1 {
+  margin: 0;
+  color: white;
+  font-size: 200px;
+}
+
+.title-page .subtitle {
+  font-size: 40px;
+  color: white;
+  font-family: sans-serif;
+}
+
+.title-page .subsubtitle {
+  margin-top: 20px;
+  font-size: 20px;
+  color: white;
+  font-family: sans-serif;
+}
+
+.game-page {
+  margin: 0;
+  padding: 0;
+  color: rgb(239, 185, 115);
+  background: #222222;
+  height: 100vh;
+  transition: 0.6s background-color, 0.6s color;
+  position: relative;
+  scroll-snap-align: start;
+}
+
+.completed-game-page {
+  color: white;
+  background: #67c384;
+}
+
+.lc-example {
+  padding: 0;
+  margin: 0;
+  font-family: "Courier New", Courier, monospace;
+  text-align: center;
+  font-size: 32px;
+  margin-top: 0;
+  margin-bottom: 10px;
+}
+
+.lc-input {
+  font-family: "Courier New", "Courier", monospace;
+  font-size: 32px;
+  border: none;
+  border-radius: 10px;
+  background-color: #363636;
+  color: white;
+  min-width: 30px;
+  min-height: 32px;
+  display: inline-block;
+  outline-width: 0;
+  transition: 0.3s background-color;
+}
+
+.lc-input:focus {
+  background-color: #454545;
+}
+
+.completed-game-page .lc-input {
+  background-color: #42815d;
+}
+
+.completed-game-page .lc-input:focus {
+  background-color: #4f9b70;
+}
+
+.spacer {
+  height: 100px;
+}
+
+.bracket0 {
+  color: #e0f585;
+}
+.bracket1 {
+  color: #5ccfd5;
+}
+.bracket2 {
+  color: #cb7bf0;
+}
+.bracket3 {
+  color: #e9aa7a;
+}
+
+.game-page .game-page-continue {
+  opacity: 0;
+  transition: opacity 0.6s, bottom 0.6s;
+  color: rgb(165, 243, 156);
+  font-size: 250px;
+  font-family: sans-serif;
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: 0;
+}
+
+.completed-game-page .game-page-continue {
+  opacity: 1;
+  bottom: 50px;
+}
