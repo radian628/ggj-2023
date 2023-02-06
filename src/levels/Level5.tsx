@@ -77,6 +77,9 @@ export function Level5(props: { onComplete: () => void }) {
         <Colorized>(SUCC (\ f x x))</Colorized> ={" "}
         <Colorized>(\ f x (f x))</Colorized>
       </div>
+      <p className="note">
+        Variable names are irrelevant. Structure is all that matters.
+      </p>
       <div className="lc-example">
         <Colorized>(SUCC (\ a b (a b)))</Colorized> ={" "}
         <Colorized>(\ a b (a (a b)))</Colorized>

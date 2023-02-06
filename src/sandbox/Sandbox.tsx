@@ -66,8 +66,8 @@ export function Sandbox() {
       ></CodeEditor>
       <ul className="lc-sandbox-eval-list">
         {betaReductionSteps.map((brs, i) => (
-          <li className="lc-sandbox-beta-reduction-line">
-            = <Colorized key={i}>{getSExprTree(brs)}</Colorized>
+          <li className="lc-sandbox-beta-reduction-line" key={i}>
+            = <Colorized>{getSExprTree(brs)}</Colorized>
           </li>
         ))}
       </ul>

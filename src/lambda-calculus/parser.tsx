@@ -79,7 +79,7 @@ export function curry(src: ASTNode):
       success: false;
       error: string;
     } {
-  const output: ASTNode = [];
+  let output: ASTNode = [];
   const contextStack: {
     src: ASTNode;
     itemIndex: number;
@@ -182,5 +182,6 @@ export function curry(src: ASTNode):
       pop();
     }
   }
+
   return { success: true, data: output };
 }

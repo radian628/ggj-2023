@@ -139,6 +139,7 @@ export function betaReduce(node: ASTNode): { node: ASTNode; done: boolean } {
               //     top.output === output,
               //     top.substitutions
               //   );
+              if (top.output === output && typeof a == "string") output = a;
               if (Array.isArray(a)) {
                 //@ts-ignore
                 top.output.push(...a);
