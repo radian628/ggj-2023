@@ -42,6 +42,16 @@ export function Level1(props: { onComplete: () => void }) {
       <div className="lc-example">
         <CodeEditor val={code} setVal={setCode}></CodeEditor> = 3
       </div>
+      <div className="show-on-continue">
+        <p className="note">
+          Tip: Variable names are arbitrary. Structure is all that matters.
+        </p>
+        <div className="lc-example">
+          <Colorized>
+            (\ f x (f (f x))) = (\ a b (a (a b))) = (\ m n (m (m n))) = 2
+          </Colorized>
+        </div>
+      </div>
       <div className="game-page-continue">▼</div>
     </section>
   );

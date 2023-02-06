@@ -63,6 +63,12 @@ export function Level2(props: { onComplete: () => void }) {
         <Colorized>{q}</Colorized> ={" "}
         <CodeEditor val={code} setVal={setCode}></CodeEditor>
       </div>
+      <div className="show-on-continue">
+        <p className="note">
+          Expressions that begin with backslashes are known as{" "}
+          <em>lambda expressions.</em>
+        </p>
+      </div>
       <div className="game-page-continue">▼</div>
     </section>
   );

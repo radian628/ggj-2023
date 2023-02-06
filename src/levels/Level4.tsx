@@ -24,6 +24,11 @@ export function Level4(props: { onComplete: () => void }) {
         <Colorized>{q}</Colorized> ={" "}
         <CodeEditor val={code} setVal={setCode}></CodeEditor>
       </div>
+      <div className="show-on-continue">
+        <p className="note">
+          Sandbox unlocked! Check the bottom of your screen.
+        </p>
+      </div>
       <div className="game-page-continue">▼</div>
     </section>
   );

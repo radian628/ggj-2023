@@ -24,6 +24,19 @@ export function Level3(props: { onComplete: () => void }) {
         <Colorized>{q}</Colorized> ={" "}
         <CodeEditor val={code} setVal={setCode}></CodeEditor>
       </div>
+      <div className="show-on-continue">
+        <p className="note">
+          Tip: The lambda expression on the left is shorthand for the one on the
+          right.
+        </p>
+        <div className="lc-example">
+          <Colorized>(\ x y z (x y)) = (\ x (\ y (\ z (x y))))</Colorized>
+        </div>
+        <p className="note">Similarly, these two are equivalent.</p>
+        <div className="lc-example">
+          <Colorized>(a b c d) = (((a b) c) d)</Colorized>
+        </div>
+      </div>
       <div className="game-page-continue">▼</div>
     </section>
   );

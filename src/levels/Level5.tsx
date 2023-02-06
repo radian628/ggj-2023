@@ -72,28 +72,19 @@ export function Level5(props: { onComplete: () => void }) {
     >
       <div className="spacer"></div>
       <div className="lc-example">SUCC n = n + 1</div>
-      <p className="note">For example...</p>
+      <p className="note">For example, SUCC 1 = 2. Or, in other words...</p>
       <div className="lc-example">
-        <Colorized>(SUCC (\ f x x))</Colorized> ={" "}
-        <Colorized>(\ f x (f x))</Colorized>
-      </div>
-      <p className="note">
-        Variable names are irrelevant. Structure is all that matters.
-      </p>
-      <div className="lc-example">
-        <Colorized>(SUCC (\ a b (a b)))</Colorized> ={" "}
-        <Colorized>(\ a b (a (a b)))</Colorized>
-      </div>
-      <div className="lc-example">
-        <Colorized>(SUCC (\ p q (p (p q))))</Colorized> ={" "}
-        <Colorized>(\ p q (p (p (p q))))</Colorized>
+        <Colorized>(SUCC (\ f x (f x)))</Colorized> ={" "}
+        <Colorized>(\ f x (f (f x)))</Colorized>
       </div>
       <div className="lc-example">
         SUCC = <CodeEditor val={code} setVal={setCode}></CodeEditor>
       </div>
-      <p className="note">
-        Note: Sandbox unlocked! Check the bottom of your screen.
-      </p>
+      <p className="note">Hint:</p>
+      <div className="lc-example">
+        <Colorized>((\ a b c (a b c)) (\ f x (f (f x))))</Colorized> ={" "}
+        <Colorized>(\ b c (b (b c)))</Colorized>
+      </div>
       <div className="game-page-continue">▼</div>
     </section>
   );

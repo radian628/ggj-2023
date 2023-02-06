@@ -8,7 +8,7 @@ html {
 }
 
 .title-page {
-  background-color: #67c384;
+  background-color: #52af6f;
   margin: 0;
   padding: 0;
   display: flex;
@@ -51,7 +51,7 @@ h1 {
 
 .completed-game-page {
   color: white;
-  background: #67c384;
+  background: #52af6f;
 }
 
 .lc-example {
@@ -146,4 +146,15 @@ h1 {
 
 .completed-game-page .note {
   color: white;
+}
+
+.show-on-continue {
+  opacity: 0;
+  transform: translateY(50px);
+  transition: opacity 0.6s, transform 0.6s;
+}
+
+.completed-game-page .show-on-continue {
+  opacity: 1;
+  transform: translateY(0px);
 }
