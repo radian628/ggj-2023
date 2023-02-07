@@ -1,9 +1,9 @@
 import { useState } from "react";
-import { getNum } from "../lambda-calculus/church-numerals";
-import { CodeEditor, Colorized } from "../lambda-calculus/CodeEditor";
-import { curry, lex, parse } from "../lambda-calculus/parser";
+import { getNum } from "../../lambda-calculus/church-numerals";
+import { CodeEditor, Colorized } from "../../lambda-calculus/CodeEditor";
+import { curry, lex, parse } from "../../lambda-calculus/parser";
 
-export function Level1(props: { onComplete: () => void }) {
+export function Numbers(props: { onComplete: () => void }) {
   const [code, setCode] = useState("?");
 
   const parsedCode = parse(lex(code));

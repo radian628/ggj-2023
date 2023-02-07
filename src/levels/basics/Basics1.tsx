@@ -1,9 +1,10 @@
 import { useState } from "react";
-import { getNum } from "../lambda-calculus/church-numerals";
-import { CodeEditor, Colorized } from "../lambda-calculus/CodeEditor";
-import { getSExprTree } from "../lambda-calculus/debug-output";
-import { alphaReduce, betaReduce } from "../lambda-calculus/interpreter";
-import { curry, lex, parse } from "../lambda-calculus/parser";
+import { getNum } from "../../lambda-calculus/church-numerals";
+import { CodeEditor, Colorized } from "../../lambda-calculus/CodeEditor";
+import { getSExprTree } from "../../lambda-calculus/debug-output";
+import { alphaReduce, betaReduce } from "../../lambda-calculus/interpreter";
+import { curry, lex, parse } from "../../lambda-calculus/parser";
+import { ClickToShow } from "../../reusable-components/ClickToShow";
 
 export function lcUnsafeEval(str: string): string {
   const parsed = parse(lex(str));
@@ -38,7 +39,7 @@ export function LCIOPair(props: { children: string }) {
   );
 }
 
-export function Level2(props: { onComplete: () => void }) {
+export function Basics1(props: { onComplete: () => void }) {
   const [code, setCode] = useState("?");
 
   const parsedCode = parse(lex(code));
@@ -59,6 +60,10 @@ export function Level2(props: { onComplete: () => void }) {
       <LCIOPair>((\ a a) b)</LCIOPair>
       <LCIOPair>((\ a (a a)) b)</LCIOPair>
       <LCIOPair>((\ a (a a)) (p q))</LCIOPair>
+      <ClickToShow text="See More Examples">
+        <LCIOPair>((\ a ((a a) a)) x)</LCIOPair>
+        <LCIOPair>((\ a ((a a) (a (a a)))) y)</LCIOPair>
+      </ClickToShow>
       <div className="lc-example">
         <Colorized>{q}</Colorized> ={" "}
         <CodeEditor val={code} setVal={setCode}></CodeEditor>

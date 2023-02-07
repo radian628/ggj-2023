@@ -1,11 +1,11 @@
 import { useState } from "react";
-import { getNum } from "../lambda-calculus/church-numerals";
-import { CodeEditor, Colorized } from "../lambda-calculus/CodeEditor";
-import { getSExprTree } from "../lambda-calculus/debug-output";
-import { alphaReduce, betaReduce } from "../lambda-calculus/interpreter";
-import { ASTNode, curry, lex, parse } from "../lambda-calculus/parser";
-import { LCIOPair, lcUnsafeEval, lcUnsafeNormalize } from "./Level2";
-import { createNumber, tryEval } from "./Level5";
+import { getNum } from "../../lambda-calculus/church-numerals";
+import { CodeEditor, Colorized } from "../../lambda-calculus/CodeEditor";
+import { getSExprTree } from "../../lambda-calculus/debug-output";
+import { alphaReduce, betaReduce } from "../../lambda-calculus/interpreter";
+import { ASTNode, curry, lex, parse } from "../../lambda-calculus/parser";
+import { LCIOPair, lcUnsafeEval, lcUnsafeNormalize } from "../basics/Basics1";
+import { createNumber, tryEval } from "./Successor";
 
 export function testAdd(addCode: ASTNode) {
   for (let i = 0; i < 10; i++) {
@@ -29,7 +29,7 @@ export function testAdd(addCode: ASTNode) {
   return true;
 }
 
-export function Level6(props: { onComplete: () => void }) {
+export function Addition(props: { onComplete: () => void }) {
   const [code, setCode] = useState("?");
 
   const parsed = parse(lex(code));
@@ -42,6 +42,8 @@ export function Level6(props: { onComplete: () => void }) {
       completed = testAdd(curried.data);
     }
   }
+
+  if (completed) props.onComplete();
 
   return (
     <section

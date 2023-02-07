@@ -6,13 +6,15 @@ import { alphaReduce, betaReduce } from "./lambda-calculus/interpreter";
 import { getSExprTree } from "./lambda-calculus/debug-output";
 import { getNum } from "./lambda-calculus/church-numerals";
 import { CodeEditor } from "./lambda-calculus/CodeEditor";
-import { Level1 } from "./levels/Level1";
-import { lcUnsafeEval, Level2 } from "./levels/Level2";
-import { Level3 } from "./levels/Level3";
-import { Level4 } from "./levels/Level4";
-import { Level5 } from "./levels/Level5";
-import { Level6 } from "./levels/Level6";
+import { Numbers } from "./levels/numbers/Numbers";
+import { lcUnsafeEval } from "./levels/basics/Basics1";
+import { Basics2 } from "./levels/basics/Basics2";
+import { Basics3 } from "./levels/basics/Basics3";
+import { Successor } from "./levels/numbers/Successor";
+import { Addition } from "./levels/numbers/Addition";
 import { Sandbox } from "./sandbox/Sandbox";
+import { Multiplication } from "./levels/numbers/Multiplication";
+import { levelsOrder } from "./levels/LevelsOrder";
 
 const TEST1 = `(\\ f x (f (f (\\ a b c (f x)))))`;
 const TEST2 = `(a b c d)`;
@@ -56,6 +58,9 @@ function App() {
   const advance = (thisLevel: number) => () =>
     setUnlocked(Math.max(unlocked, thisLevel + 1));
 
+  //@ts-ignore
+  window.forceAdvance = (n: number) => setUnlocked(n);
+
   return (
     <div className="App">
       <section className="title-page">
@@ -63,13 +68,20 @@ function App() {
         <span className="subtitle">The Roots of Computation</span>
         <span className="subsubtitle">A game about Lambda Calculus</span>
       </section>
-      <Level1 onComplete={advance(1)}></Level1>
+      {levelsOrder.map((Lv, i) =>
+        unlocked >= i + 1 ? (
+          <Lv key={i} onComplete={advance(i + 1)}></Lv>
+        ) : undefined
+      )}
+      {/* <Level1 onComplete={advance(1)}></Level1>
       {unlocked >= 2 && <Level2 onComplete={advance(2)}></Level2>}
       {unlocked >= 3 && <Level3 onComplete={advance(3)}></Level3>}
       {unlocked >= 4 && <Level4 onComplete={advance(4)}></Level4>}
       {unlocked >= 5 && <Level5 onComplete={advance(5)}></Level5>}
       {unlocked >= 6 && <Level6 onComplete={advance(6)}></Level6>}
+      {unlocked >= 7 && <Level7 onComplete={advance(7)}></Level7>}
 
+       */}
       {unlocked >= 5 && <Sandbox></Sandbox>}
     </div>
   );

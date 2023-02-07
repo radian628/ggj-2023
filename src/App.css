@@ -151,10 +151,27 @@ h1 {
 .show-on-continue {
   opacity: 0;
   transform: translateY(50px);
+  margin-top: 50px;
   transition: opacity 0.6s, transform 0.6s;
 }
 
 .completed-game-page .show-on-continue {
   opacity: 1;
   transform: translateY(0px);
+}
+
+.click-to-show {
+  background-color: #444444;
+  color: white;
+  border-radius: 20px;
+  padding: 20px;
+  border: none;
+  margin: 15px;
+  margin-left: 50%;
+  transform: translateX(-50%);
+  transition: background-color 0.3s;
+}
+
+.click-to-show:hover {
+  background-color: #666666;
 }

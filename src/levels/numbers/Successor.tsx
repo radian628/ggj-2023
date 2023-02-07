@@ -1,10 +1,10 @@
 import { useState } from "react";
-import { getNum } from "../lambda-calculus/church-numerals";
-import { CodeEditor, Colorized } from "../lambda-calculus/CodeEditor";
-import { getSExprTree } from "../lambda-calculus/debug-output";
-import { alphaReduce, betaReduce } from "../lambda-calculus/interpreter";
-import { ASTNode, curry, lex, parse } from "../lambda-calculus/parser";
-import { LCIOPair, lcUnsafeEval, lcUnsafeNormalize } from "./Level2";
+import { getNum } from "../../lambda-calculus/church-numerals";
+import { CodeEditor, Colorized } from "../../lambda-calculus/CodeEditor";
+import { getSExprTree } from "../../lambda-calculus/debug-output";
+import { alphaReduce, betaReduce } from "../../lambda-calculus/interpreter";
+import { ASTNode, curry, lex, parse } from "../../lambda-calculus/parser";
+import { LCIOPair, lcUnsafeEval, lcUnsafeNormalize } from "../basics/Basics1";
 
 export function tryEval(
   node: ASTNode
@@ -50,7 +50,7 @@ export function testSuccessor(successorCode: ASTNode) {
   return true;
 }
 
-export function Level5(props: { onComplete: () => void }) {
+export function Successor(props: { onComplete: () => void }) {
   const [code, setCode] = useState("?");
 
   const parsed = parse(lex(code));
@@ -72,13 +72,13 @@ export function Level5(props: { onComplete: () => void }) {
     >
       <div className="spacer"></div>
       <div className="lc-example">SUCC n = n + 1</div>
-      <p className="note">For example, SUCC 1 = 2. Or, in other words...</p>
+      <div className="lc-example">
+        SUCC = <CodeEditor val={code} setVal={setCode}></CodeEditor>
+      </div>
+      <p className="note">As an example, SUCC 1 = 2. Or, in other words...</p>
       <div className="lc-example">
         <Colorized>(SUCC (\ f x (f x)))</Colorized> ={" "}
         <Colorized>(\ f x (f (f x)))</Colorized>
-      </div>
-      <div className="lc-example">
-        SUCC = <CodeEditor val={code} setVal={setCode}></CodeEditor>
       </div>
       <p className="note">Hint:</p>
       <div className="lc-example">

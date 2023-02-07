@@ -1,9 +1,9 @@
 import { useState } from "react";
-import { CodeEditor, Colorized } from "../lambda-calculus/CodeEditor";
-import { lex, parse } from "../lambda-calculus/parser";
-import { LCIOPair, lcUnsafeEval, lcUnsafeNormalize } from "./Level2";
+import { CodeEditor, Colorized } from "../../lambda-calculus/CodeEditor";
+import { lex, parse } from "../../lambda-calculus/parser";
+import { LCIOPair, lcUnsafeEval, lcUnsafeNormalize } from "./Basics1";
 
-export function Level3(props: { onComplete: () => void }) {
+export function Basics2(props: { onComplete: () => void }) {
   const [code, setCode] = useState("?");
 
   let q = `((\\ m n ((m m) n)) a (x y))`;
@@ -25,10 +25,7 @@ export function Level3(props: { onComplete: () => void }) {
         <CodeEditor val={code} setVal={setCode}></CodeEditor>
       </div>
       <div className="show-on-continue">
-        <p className="note">
-          Tip: The lambda expression on the left is shorthand for the one on the
-          right.
-        </p>
+        <p className="note">Tip: The two expressions below are equivalent.</p>
         <div className="lc-example">
           <Colorized>(\ x y z (x y)) = (\ x (\ y (\ z (x y))))</Colorized>
         </div>

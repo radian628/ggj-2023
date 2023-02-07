@@ -1,9 +1,9 @@
 import { useState } from "react";
-import { CodeEditor, Colorized } from "../lambda-calculus/CodeEditor";
-import { lex, parse } from "../lambda-calculus/parser";
-import { LCIOPair, lcUnsafeEval, lcUnsafeNormalize } from "./Level2";
+import { CodeEditor, Colorized } from "../../lambda-calculus/CodeEditor";
+import { lex, parse } from "../../lambda-calculus/parser";
+import { LCIOPair, lcUnsafeEval, lcUnsafeNormalize } from "./Basics1";
 
-export function Level4(props: { onComplete: () => void }) {
+export function Basics3(props: { onComplete: () => void }) {
   const [code, setCode] = useState("?");
 
   let q = `((\\ m n ((m n) n)) (\\ a b (a b)) (x y))`;
@@ -18,6 +18,9 @@ export function Level4(props: { onComplete: () => void }) {
       className={completed ? "game-page completed-game-page" : "game-page"}
     >
       <div className="spacer"></div>
+      <p className="note">
+        Note: You may want a sheet of paper or a text editor.
+      </p>
       <LCIOPair>((\ a (a b)) (\ x (x x)))</LCIOPair>
       <LCIOPair>((\ a b (a b)) (\ x (x x)) (y y))</LCIOPair>
       <div className="lc-example">
