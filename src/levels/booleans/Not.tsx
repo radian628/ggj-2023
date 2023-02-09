@@ -62,14 +62,10 @@ export function Not(props: { onComplete: () => void }) {
         <Colorized>FALSE = (\ t f f)</Colorized>
       </div>
       <div className="lc-example">
-        <Colorized>
-          (NOT FALSE) = (NOT (\ t f f)) = (\ t f t) = (NOT TRUE)
-        </Colorized>
+        <Colorized>(NOT FALSE) = (NOT (\ t f f)) = (\ t f t) = TRUE</Colorized>
       </div>
       <div className="lc-example">
-        <Colorized>
-          (NOT TRUE) = (NOT (\ t f t)) = (\ t f f) = (NOT FALSE)
-        </Colorized>
+        <Colorized>(NOT TRUE) = (NOT (\ t f t)) = (\ t f f) = FALSE</Colorized>
       </div>
       <div className="lc-example">
         NOT = <CodeEditor val={code} setVal={setCode}></CodeEditor>
