@@ -1,0 +1,17 @@
+{
+  "devDependencies": {
+    "typescript": "^4.9.5",
+    "vite": "^4.1.4",
+    "vite-plugin-solid": "^2.6.1"
+  },
+  "dependencies": {
+    "@solid-primitives/keyed": "^1.1.10",
+    "gl-matrix": "^3.4.3",
+    "solid-js": "^1.6.11"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "wasm": "cd ../extensible-lambda-calculus && wasm-pack build --target web --out-dir ../game/src/elc/"
+  }
+}
