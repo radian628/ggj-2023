@@ -1,0 +1,88 @@
+.level {
+  scroll-snap-type: y proximity;
+  width: 100vw;
+  height: 100vh;
+  overflow: scroll;
+  overflow-x: hidden;
+}
+
+.screen {
+  background-color: #121212;
+  width: 100vw;
+  height: 100vh;
+  margin: 0;
+  padding: 0;
+  color: white;
+  overflow: hidden;
+  font-family: "Helvetica", sans-serif;
+  scroll-snap-align: start;
+}
+
+.triangle {
+  border-width: calc(min(10vw, 10vh));
+  border-color: white #00000000 #00000000 #00000000;
+  width: 0;
+  border-style: solid;
+  margin: auto;
+  margin-bottom: calc(-2 * min(10vw, 10vh));
+}
+
+.screen-scroller {
+  transition: transform 0.35s, border-color 0.35s;
+  cursor: pointer;
+}
+
+.screen-scroller:hover {
+  transform: translateY(10px);
+  border-color: #ffffff88 #00000000 #00000000 #00000000;
+}
+
+.small-expr {
+  width: fit-content;
+  min-width: 40px;
+  font-size: 30px;
+}
+
+.inline-expr {
+  display: inline-block;
+  min-width: 40px;
+  margin-top: 3px;
+}
+
+.intext-expr {
+  display: inline-block;
+  width: fit-content;
+}
+
+.no-select {
+  user-select: none;
+}
+
+.small-expr .cm-editor,
+.intext-expr .cm-editor {
+  border-radius: 10px;
+  padding-right: 5px;
+  display: inline-block;
+}
+
+.static-expr .cm-editor {
+  background-color: #222222;
+}
+
+.approximately-centered {
+  width: calc(min(650px, 100vw));
+  margin: auto;
+  margin-top: 10vh;
+}
+
+.important-desc {
+  font-size: 20px;
+}
+
+.big-break {
+  height: 20vh;
+}
+
+.scroll-triangle-revealer {
+  transition: transform 2.35s, opacity 2.35s;
+}

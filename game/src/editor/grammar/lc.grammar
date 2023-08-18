@@ -1,0 +1,35 @@
+@precedence { assignment @left, pairing @left }
+
+@top Program { statement* }
+
+statement { AssignmentDef !assignment ":=" expr }
+
+Parenthesized { "(" expr ")" }
+
+Lambda { LambdaToken VariableDef+ LambdaDot expr }
+
+LambdaToken[closedBy=LambdaDot] { "\\" }
+
+LambdaDot[openedBy=LambdaToken] { "." }
+
+Pair { expr !pairing expr }
+
+Variable { variable }
+VariableDef { variable }
+AssignmentDef { variable }
+
+expr {
+  Parenthesized | Lambda | Pair | Variable 
+}
+
+@tokens {
+  variable { $[a-zA-Z_0-9]+ }
+  
+  ws { $[ \t\n\r]+  }
+
+  "(" ")" "\\" "."
+}
+
+@skip { ws }
+
+@detectDelim

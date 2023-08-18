@@ -1,0 +1,43 @@
+.title-screen {
+  width: 100vw;
+  height: 100vh;
+  margin: 0;
+  background-color: #41ba70;
+  color: white;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-family: "Helvetica", sans-serif;
+  overflow: hidden;
+}
+
+.title-screen h1 {
+  font-size: 6vw;
+}
+
+.title-screen p {
+  font-size: 3vw;
+}
+
+.title-screen .header {
+  text-align: center;
+  animation-name: header;
+  animation-duration: 1.5s;
+  animation-delay: 0.5s;
+  animation-fill-mode: both;
+}
+
+@keyframes header {
+  from {
+    opacity: 0;
+    transform: translateY(10vw);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.logo {
+  width: calc(min(50vh, 50vw));
+}
