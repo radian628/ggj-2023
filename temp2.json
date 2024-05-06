@@ -1,0 +1,33 @@
+{
+  "type": "abstraction",
+  "body": {
+    "type": "abstraction",
+    "body": {
+      "type": "application",
+      "left": { "type": "variable", "name": "f", "index": 1 },
+      "right": {
+        "type": "application",
+        "left": {
+          "type": "thunk",
+          "reducedForm": {},
+          "inner": {
+            "type": "abstraction",
+            "body": {
+              "type": "abstraction",
+              "body": { "type": "variable", "name": "x", "index": 0 },
+              "varName": "x"
+            },
+            "varName": "f"
+          }
+        },
+        "right": {
+          "type": "application",
+          "left": { "type": "variable", "name": "f", "index": 1 },
+          "right": { "type": "variable", "name": "x", "index": 0 }
+        }
+      }
+    },
+    "varName": "x"
+  },
+  "varName": "f"
+}
