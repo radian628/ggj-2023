@@ -11,6 +11,7 @@ import {
   seq,
   tok,
 } from "typescript-parsec";
+import { fakeRecursiveFunction } from "./recursion.js";
 
 export type TextRange = {
   start: number;
@@ -328,161 +329,259 @@ export function betaReduceUntilDoneShowAllSteps(body: Term) {
 
 export let globalLog: any[] = [];
 
-export function betaReduce(body: Term): {
-  term: Term;
-  done: boolean;
-} {
-  globalLog.push(printTerm(body));
-  const callStack: {
-    term: Term;
-    substitutions: Map<
-      number,
-      {
-        term: Term;
-        reducedForm: { ref?: Term };
-      }
-    >;
-    step: 0;
-    evaluateThunk?: true;
-  }[] = [
-    {
-      term: body,
-      substitutions: new Map(),
-      step: 0,
-    },
-  ];
-  const outputTermStack: Term[] = [];
-  let i = 0;
-  let done = true;
-  while (callStack.length > 0) {
-    i++;
-    const { term, step, substitutions, evaluateThunk } =
-      callStack[callStack.length - 1];
+// export function offsetDiBrujinIndicesRecursive(term: Term, offset: number) {}
 
-    switch (term.type) {
-      case "variable":
-        if (term.name === "succ") {
-          globalLog.push(
-            "succ",
-            term,
-            step,
-            callStack.map((cs) => cs.substitutions)
-          );
-        }
-        const sub = substitutions.get(term.index);
-        if (sub) {
-          outputTermStack.push({
-            type: "thunk",
-            reducedForm: sub.reducedForm,
-            inner: sub.term,
-          });
-        } else {
-          outputTermStack.push(term);
-        }
-        callStack.pop();
-        break;
-      case "application":
-        if (step == 0) {
-          callStack[callStack.length - 1].step++;
-          callStack.push({
-            term: term.left,
-            substitutions,
-            step: 0,
-            evaluateThunk: true,
-          });
-          callStack.push({
-            term: term.right,
-            substitutions,
-            step: 0,
-          });
-        } else if (step == 1) {
-          const left = outputTermStack.pop()!;
-          const right = outputTermStack.pop()!;
-          if (left.type === "abstraction") {
-            globalLog.push("applying abstraction", left.varName);
-            // this is something we can beta reduce
-            done = false;
-            callStack.pop();
-            callStack.push({
-              term: left.body,
-              substitutions: new Map([
-                ...[...substitutions].map(
-                  ([k, v]) =>
-                    [k + 1, v] as [
-                      number,
-                      {
-                        term: Term;
-                        reducedForm: { ref?: Term };
-                      }
-                    ]
-                ),
-                [
-                  0,
-                  {
-                    term: right,
-                    reducedForm: {},
-                  },
-                ],
-              ]),
-              step: 0,
-            });
-          } else {
-            outputTermStack.push({
-              type: "application",
-              left,
-              right,
-            });
-            callStack.pop();
-          }
-        }
-        break;
-      case "abstraction":
-        if (step == 0) {
-          callStack[callStack.length - 1].step++;
-          callStack.push({
-            term: term.body,
-            substitutions: new Map(
-              [...substitutions].map(([k, v]) => [k + 1, v])
-            ),
-            step: 0,
-          });
-        } else {
-          const body = outputTermStack.pop()!;
-          outputTermStack.push({
-            type: "abstraction",
-            body,
-            varName: term.varName,
-          });
-          callStack.pop();
-        }
-        break;
-      case "thunk":
-        if (term.reducedForm.ref) {
-          outputTermStack.push(term.reducedForm.ref);
-          callStack.pop();
-        } else {
-          if (step == 0) {
-            callStack[callStack.length - 1].step++;
-            callStack.push({
-              term: term.inner,
-              substitutions,
-              step: 0,
-            });
-          } else {
-            term.reducedForm.ref = outputTermStack.pop();
-          }
-        }
-    }
-  }
-
-  const term = outputTermStack.pop();
-
-  if (!term) {
-    throw new Error("output term stack should not be empty");
-  }
-
+let betaReduceDone = false;
+export function betaReduce(term: Term) {
+  betaReduceDone = true;
+  const reducedTerm = betaReduceInner([term, new Map()]);
   return {
-    term,
-    done,
+    done: betaReduceDone,
+    term: reducedTerm,
   };
 }
+
+type SubstitutionMap = Map<
+  number,
+  {
+    term: Term;
+    reducedForm: { ref?: Term };
+  }
+>;
+// TODO: figure out outermost leftmost parsing
+export const betaReduceInner = fakeRecursiveFunction<
+  [Term, SubstitutionMap],
+  Term
+>(function* ([body, substitutions]): Generator<
+  [Term, SubstitutionMap],
+  Term,
+  Term
+> {
+  switch (body.type) {
+    case "variable":
+      const sub = substitutions.get(body.index);
+      if (sub) {
+        return {
+          type: "thunk",
+          reducedForm: sub.reducedForm,
+          inner: sub.term,
+        };
+      }
+      return body;
+    case "application":
+      const left = yield [body.left, substitutions];
+      const right = yield [body.right, substitutions];
+      if (left.type === "abstraction") {
+        betaReduceDone = false;
+        return yield [
+          left.body,
+          new Map([
+            ...[...substitutions].map(
+              ([k, v]) =>
+                [k + 1, v] as [
+                  number,
+                  {
+                    term: Term;
+                    reducedForm: { ref?: Term };
+                  }
+                ]
+            ),
+            [
+              0,
+              {
+                term: right,
+                reducedForm: {},
+              },
+            ],
+          ]),
+        ];
+      }
+      return {
+        left,
+        right,
+        type: "application",
+      };
+    case "abstraction":
+      return {
+        type: "abstraction",
+        varName: body.varName,
+        body: yield [
+          body.body,
+          new Map([...substitutions].map(([k, v]) => [k + 1, v])),
+        ],
+      };
+    case "thunk":
+      if (body.reducedForm.ref) {
+        return body.reducedForm.ref;
+      }
+      const reducedForm = yield [body.inner, substitutions];
+      body.reducedForm.ref = reducedForm;
+      return reducedForm;
+  }
+});
+
+// export function betaReduce(body: Term): {
+//   term: Term;
+//   done: boolean;
+// } {
+//   globalLog.push(printTerm(body));
+//   const callStack: {
+//     term: Term;
+//     substitutions: Map<
+//       number,
+//       {
+//         term: Term;
+//         reducedForm: { ref?: Term };
+//       }
+//     >;
+//     step: 0;
+//     evaluateApplications: boolean;
+//     evaluateThunk?: true;
+//   }[] = [
+//     {
+//       term: body,
+//       substitutions: new Map(),
+//       step: 0,
+//       evaluateApplications: true,
+//     },
+//   ];
+//   const outputTermStack: Term[] = [];
+//   let i = 0;
+//   let done = true;
+//   while (callStack.length > 0) {
+//     i++;
+//     const { term, step, substitutions, evaluateThunk, evaluateApplications } =
+//       callStack[callStack.length - 1];
+
+//     switch (term.type) {
+//       case "variable":
+//         if (term.name === "succ") {
+//           globalLog.push(
+//             "succ",
+//             term,
+//             step,
+//             callStack.map((cs) => cs.substitutions)
+//           );
+//         }
+//         const sub = substitutions.get(term.index);
+//         if (sub) {
+//           outputTermStack.push({
+//             type: "thunk",
+//             reducedForm: sub.reducedForm,
+//             inner: sub.term,
+//           });
+//         } else {
+//           outputTermStack.push(term);
+//         }
+//         callStack.pop();
+//         break;
+//       case "application":
+//         if (step == 0) {
+//           callStack[callStack.length - 1].step++;
+//           callStack.push({
+//             term: term.left,
+//             substitutions,
+//             step: 0,
+//             evaluateThunk: true,
+//             evaluateApplications,
+//           });
+//           callStack.push({
+//             term: term.right,
+//             substitutions,
+//             step: 0,
+//             evaluateApplications,
+//           });
+//         } else if (step == 1) {
+//           const left = outputTermStack.pop()!;
+//           const right = outputTermStack.pop()!;
+//           if (evaluateApplications && left.type === "abstraction") {
+//             globalLog.push("applying abstraction", left.varName);
+//             // this is something we can beta reduce
+//             done = false;
+//             callStack.pop();
+//             callStack.push({
+//               term: left.body,
+//               substitutions: new Map([
+//                 ...[...substitutions].map(
+//                   ([k, v]) =>
+//                     [k + 1, v] as [
+//                       number,
+//                       {
+//                         term: Term;
+//                         reducedForm: { ref?: Term };
+//                       }
+//                     ]
+//                 ),
+//                 [
+//                   0,
+//                   {
+//                     term: right,
+//                     reducedForm: {},
+//                   },
+//                 ],
+//               ]),
+//               step: 0,
+//               evaluateApplications,
+//             });
+//           } else {
+//             outputTermStack.push({
+//               type: "application",
+//               left,
+//               right,
+//             });
+//             callStack.pop();
+//           }
+//         }
+//         break;
+//       case "abstraction":
+//         if (step == 0) {
+//           callStack[callStack.length - 1].step++;
+//           callStack.push({
+//             term: term.body,
+//             substitutions: new Map(
+//               [...substitutions].map(([k, v]) => [k + 1, v])
+//             ),
+//             step: 0,
+//             evaluateApplications,
+//           });
+//         } else {
+//           const body = outputTermStack.pop()!;
+//           outputTermStack.push({
+//             type: "abstraction",
+//             body,
+//             varName: term.varName,
+//           });
+//           callStack.pop();
+//         }
+//         break;
+//       case "thunk":
+//         if (term.reducedForm.ref) {
+//           outputTermStack.push(term.reducedForm.ref);
+//           callStack.pop();
+//         } else {
+//           if (step == 0) {
+//             callStack[callStack.length - 1].step++;
+//             callStack.push({
+//               term: term.inner,
+//               substitutions,
+//               step: 0,
+//               evaluateApplications,
+//             });
+//           } else {
+//             term.reducedForm.ref = outputTermStack.pop();
+//           }
+//         }
+//     }
+//   }
+
+//   const term = outputTermStack.pop();
+
+//   if (!term) {
+//     throw new Error("output term stack should not be empty");
+//   }
+
+//   return {
+//     term,
+//     done,
+//   };
+// }
