@@ -329,96 +329,163 @@ export function betaReduceUntilDoneShowAllSteps(body: Term) {
 
 export let globalLog: any[] = [];
 
-// export function offsetDiBrujinIndicesRecursive(term: Term, offset: number) {}
+type BetaReduceInnerProps =
+  | {
+      type: "reduce";
+      term: Term;
+      isOutermost?: true;
+    }
+  | {
+      type: "substitute";
+      term: Term;
+      index: number;
+      substitution: Term;
+    }
+  | {
+      type: "evaluate-thunk";
+      term: Term;
+    };
 
-let betaReduceDone = false;
-export function betaReduce(term: Term) {
-  betaReduceDone = true;
-  const reducedTerm = betaReduceInner([term, new Map()]);
+let betaReductionDone = true;
+function betaReduce(term: Term) {
+  betaReductionDone = true;
+  const result = betaReduceInner({
+    type: "reduce",
+    term,
+    isOutermost: true,
+  });
   return {
-    done: betaReduceDone,
-    term: reducedTerm,
+    done: betaReductionDone,
+    term: result,
   };
 }
 
-type SubstitutionMap = Map<
-  number,
-  {
-    term: Term;
-    reducedForm: { ref?: Term };
-  }
->;
-// TODO: figure out outermost leftmost parsing
+// horrible janky mess to avoid needing to use recursion
 export const betaReduceInner = fakeRecursiveFunction<
-  [Term, SubstitutionMap],
+  BetaReduceInnerProps,
   Term
->(function* ([body, substitutions]): Generator<
-  [Term, SubstitutionMap],
-  Term,
-  Term
-> {
-  switch (body.type) {
-    case "variable":
-      const sub = substitutions.get(body.index);
-      if (sub) {
+>(function* (props): Generator<BetaReduceInnerProps, Term, Term> {
+  // beta-reduce (outermost leftmost)
+  if (props.type === "reduce") {
+    const { term } = props;
+    switch (term.type) {
+      case "variable":
+        return term;
+      case "application":
+        const left = yield { type: "evaluate-thunk", term: term.left };
+        if (left.type === "abstraction") {
+          betaReductionDone = false;
+          return yield {
+            type: "substitute",
+            term: left.body,
+            index: 0,
+            substitution: {
+              type: "thunk",
+              reducedForm: {},
+              inner: term.right,
+            },
+          };
+        } else {
+          return {
+            type: "application",
+            left: yield { type: "reduce", term: term.left },
+            right: yield { type: "reduce", term: term.right },
+          };
+        }
+      case "abstraction":
+        if (!props.isOutermost) {
+          return term;
+        }
         return {
-          type: "thunk",
-          reducedForm: sub.reducedForm,
-          inner: sub.term,
+          type: "abstraction",
+          body: yield { type: "reduce", term: term.body, isOutermost: true },
+          varName: term.varName,
         };
+      case "thunk":
+        return yield { type: "evaluate-thunk", term };
+    }
+
+    // variable substitution
+  } else if (props.type === "substitute") {
+    const { term, index, substitution } = props;
+    switch (term.type) {
+      case "variable":
+        if (term.index === index) {
+          return substitution;
+        }
+        return term;
+      case "application":
+        return {
+          type: "application",
+          left: yield {
+            type: "substitute",
+            term: term.left,
+            index,
+            substitution,
+          },
+          right: yield {
+            type: "substitute",
+            term: term.right,
+            index,
+            substitution,
+          },
+        };
+      case "abstraction":
+        return {
+          type: "abstraction",
+          body: yield {
+            type: "substitute",
+            term: term.body,
+            index: index + 1,
+            substitution,
+          },
+          varName: term.varName,
+        };
+      case "thunk":
+        return yield {
+          type: "substitute",
+          term: yield { type: "evaluate-thunk", term },
+          index,
+          substitution,
+        };
+    }
+
+    // evaluate thunks
+  } else {
+    const { term } = props;
+    if (term.type === "thunk") {
+      if (!term.reducedForm.ref) {
+        term.reducedForm.ref = yield { type: "reduce", term: term.inner };
       }
-      return body;
-    case "application":
-      const left = yield [body.left, substitutions];
-      const right = yield [body.right, substitutions];
-      if (left.type === "abstraction") {
-        betaReduceDone = false;
-        return yield [
-          left.body,
-          new Map([
-            ...[...substitutions].map(
-              ([k, v]) =>
-                [k + 1, v] as [
-                  number,
-                  {
-                    term: Term;
-                    reducedForm: { ref?: Term };
-                  }
-                ]
-            ),
-            [
-              0,
-              {
-                term: right,
-                reducedForm: {},
-              },
-            ],
-          ]),
-        ];
-      }
-      return {
-        left,
-        right,
-        type: "application",
-      };
-    case "abstraction":
-      return {
-        type: "abstraction",
-        varName: body.varName,
-        body: yield [
-          body.body,
-          new Map([...substitutions].map(([k, v]) => [k + 1, v])),
-        ],
-      };
-    case "thunk":
-      if (body.reducedForm.ref) {
-        return body.reducedForm.ref;
-      }
-      const reducedForm = yield [body.inner, substitutions];
-      body.reducedForm.ref = reducedForm;
-      return reducedForm;
+      return yield { type: "evaluate-thunk", term: term.reducedForm.ref };
+    }
+    return term;
   }
 });
+
+// export const substitute = fakeRecursiveFunction<[Term, number, Term], Term>(
+//   function* ([term, index, substitution]) {
+//     switch (term.type) {
+//       case "variable":
+//         if (term.index === index) {
+//           return substitution;
+//         }
+//         return term;
+//       case "application":
+//         return {
+//           type: "application",
+//           left: yield [term.left, index, substitution],
+//           right: yield [term.right, index, substitution],
+//         };
+//       case "abstraction":
+//         return {
+//           type: "abstraction",
+//           body: yield [term.body, index + 1, substitution],
+//         };
+//       case "thunk":
+//     }
+//   }
+// );
 
 // export function betaReduce(body: Term): {
 //   term: Term;

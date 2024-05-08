@@ -86,52 +86,26 @@ test("add 2 2 = 4", (t) => {
 
 test("mul 3 3 = 9", (t) => {
   const parseResult = compiler.parseLambdaCalculus(
-    // `
-    //   (\\succ.
-    //     (\\add.
-    //       (\\mul.
-    //         (\\three.
-    //           mul three three
-    //         )
-    //         (\\f. \\x. f (f (f x)))
-    //       )
-    //       (\\m. \\n. \\f. \\x. (m f x) add (n f x))
-    //     )
-    //     (\\m. \\n. \\f. \\x. (m f x) succ (n f x))
-    //   )
-    //   (\\n. \\f. \\x. f (n f x))
-    // `
-
-    // okay, I've figured out what's going on here:
-    // the LHS is being evaluated, decreasing the effective
-    // di brujin index by 1, and yet I don't change the indices
-    // `
-    //   (\\succ.
-    //     (
-    //       (\\three.
-    //         (succ three)
-    //       )
-    //       (\\f. \\x. f (f (f x)))
-    //     )
-    //   )
-    //   (\\n. \\f. \\x. f (n f x))
-    // `
-
     `
-      (\\succ.
-       \\three.
-         succ three
-      )
-      (\\n. \\f. \\x. f (n f x))
-      (\\f. \\x. f (f (f x)))
+(\\succ.
+ \\three.
+  (\\add.
+    (\\mul.
+      (mul three three)
+    )
+    (\\a. \\b. \\f2. \\x2. a (add b) (\\f3. \\x3. x3) f2 x2) 
+  )
+  (\\m1. \\n1. \\f1. \\x1. m1 f1 (n1 f1 x1)) 
+)
+(\\n. \\f. \\x. f (n f x))
+(\\f. \\x. f (f (f x)))
     `
   );
 
   t.assert(parseResult.type === "success");
   if (parseResult.type === "success") {
     const runResult = compiler.betaReduceUntilDone(parseResult.term);
-    compiler.globalLog.push(compiler.printTerm(runResult));
-    console.log(compiler.globalLog);
+    console.log(compiler.printTerm(runResult));
     t.deepEqual(compiler.parseChurchNumeral(runResult), 9);
   }
 });
