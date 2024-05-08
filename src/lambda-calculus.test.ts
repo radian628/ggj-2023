@@ -109,3 +109,16 @@ test("mul 3 3 = 9", (t) => {
     t.deepEqual(compiler.parseChurchNumeral(runResult), 9);
   }
 });
+
+// test("recursion", t => {
+//   const parseResult = compiler.parseLambdaCalculus(
+//     `
+// (\\Y.
+//  \\succ.
+
+// )
+// (\\f. (\\x. f (x x)) (\\x. f (x x)))
+// (\\n. \\f. \\x. f (n f x))
+//     `
+//   )
+// })
