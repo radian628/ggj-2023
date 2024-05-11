@@ -1,0 +1,18 @@
+0n = \f. \x. x
+
+succ = \f. \x. f (n f x)
+
+1n = succ 0n
+2n = succ 1n
+3n = succ 2n
+4n = succ 3n
+5n = succ 4n
+6n = succ 5n
+7n = succ 6n
+8n = succ 7n
+9n = succ 8n
+
+add-n = \m. \n. \f. \x. m f (n f x)
+mul-n = \m. \n. m (add-n n) 0
+pow-n = \m. \n. n (mul-n m) 0
+

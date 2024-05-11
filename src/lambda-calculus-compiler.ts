@@ -6,12 +6,44 @@ import {
   expectEOF,
   expectSingleResult,
   kmid,
+  lrec,
   lrec_sc,
+  rep_sc,
   rule,
   seq,
   tok,
 } from "typescript-parsec";
 import { fakeRecursiveFunction } from "./recursion.js";
+import { CompilerResult, cerrMap2, map1, splitResultList } from "./result.js";
+import { programToASTTraditional } from "./parsers/traditional.js";
+
+export type Statement =
+  | {
+      type: "import";
+      file: string;
+      pos: TokenPosition;
+    }
+  | {
+      type: "definition";
+      name: string;
+      value: Term;
+    };
+
+export type PartialParseProgram = (
+  | {
+      type: "import";
+      import: string;
+    }
+  | {
+      type: "definition";
+      name: string;
+      value: PartialParsedTerm;
+    }
+)[];
+
+export type Program = Statement[];
+
+export type RunnableProgram = Map<string, Term>;
 
 export type TextRange = {
   start: number;
@@ -51,7 +83,11 @@ export type ErrorableTerm =
       left: ErrorableTerm;
       right: ErrorableTerm;
     }
-  | CompilerError;
+  | {
+      type: "unbound-variable";
+      name: string;
+      pos: TokenPosition;
+    };
 
 export type CompilerError = {
   type: "error";
@@ -82,69 +118,6 @@ export type Term =
       reducedForm: { ref?: Term };
     };
 
-enum TokenKind {
-  Lambda,
-  Dot,
-  VariableName,
-  LParen,
-  RParen,
-  Space,
-}
-
-const lexer = buildLexer([
-  [true, /^(\\|λ)/g, TokenKind.Lambda],
-  [true, /^\./g, TokenKind.Dot],
-  [true, /^\w+/g, TokenKind.VariableName],
-  [true, /^\(/g, TokenKind.LParen],
-  [true, /^\)/g, TokenKind.RParen],
-  [false, /^\s+/g, TokenKind.Space],
-]);
-
-const PRIMARY_TERM = rule<TokenKind, PartialParsedTerm>();
-const APPLICATION = rule<TokenKind, PartialParsedTerm>();
-const TERM = rule<TokenKind, PartialParsedTerm>();
-const ONLY_ABSTRACTION = rule<TokenKind, PartialParsedTerm>();
-
-PRIMARY_TERM.setPattern(
-  alt_sc(
-    kmid(tok(TokenKind.LParen), TERM, tok(TokenKind.RParen)),
-    apply(tok(TokenKind.VariableName), (t) => ({
-      name: t.text,
-      type: "variable",
-      pos: t.pos,
-    }))
-  )
-);
-
-APPLICATION.setPattern(
-  alt_sc(
-    lrec_sc(PRIMARY_TERM, PRIMARY_TERM, (left, right) => ({
-      type: "application",
-      left,
-      right,
-    })),
-    PRIMARY_TERM
-  )
-);
-
-TERM.setPattern(alt_sc(ONLY_ABSTRACTION, APPLICATION));
-
-ONLY_ABSTRACTION.setPattern(
-  apply(
-    seq(
-      tok(TokenKind.Lambda),
-      tok(TokenKind.VariableName),
-      tok(TokenKind.Dot),
-      TERM
-    ),
-    ([_, varName, __, term]) => ({
-      type: "abstraction",
-      varName: varName.text,
-      body: term,
-    })
-  )
-);
-
 export function addDiBrujinIndices(
   term: PartialParsedTerm,
   varStack: string[] = []
@@ -174,8 +147,8 @@ export function addDiBrujinIndices(
         }
       }
       return {
-        type: "error",
-        why: `variable '${term.name}' not bound`,
+        type: "unbound-variable",
+        name: term.name,
         pos: term.pos,
       };
   }
@@ -219,10 +192,16 @@ export function separateOutErrors(term: ErrorableTerm):
       errors: CompilerError[];
     } {
   switch (term.type) {
-    case "error":
+    case "unbound-variable":
       return {
         type: "failure",
-        errors: [term],
+        errors: [
+          {
+            type: "error",
+            why: `Variable '${term.name}' not bound.`,
+            pos: term.pos,
+          },
+        ],
       };
     case "variable":
       return {
@@ -267,9 +246,151 @@ export function separateOutErrors(term: ErrorableTerm):
   }
 }
 
-export function parseLambdaCalculus(input: string) {
-  const parsed = expectSingleResult(expectEOF(TERM.parse(lexer.parse(input))));
-  return separateOutErrors(addDiBrujinIndices(parsed));
+export function parseLambdaCalculus(
+  input: string,
+  syntaxToAST: (input: string) => PartialParsedTerm
+) {
+  return separateOutErrors(addDiBrujinIndices(syntaxToAST(input)));
+}
+
+export function substituteVariables(
+  term: ErrorableTerm,
+  getSubstitution: (name: string) => CompilerResult<Term> | undefined,
+  encounteredSoFar: Set<string>
+): CompilerResult<Term> {
+  switch (term.type) {
+    case "variable":
+      return {
+        type: "success",
+        value: term,
+      };
+    case "abstraction":
+      const body = substituteVariables(
+        term.body,
+        getSubstitution,
+        encounteredSoFar
+      );
+      return map1(body, (body) => ({
+        ...term,
+        body,
+      }));
+    case "application":
+      const left = substituteVariables(
+        term.left,
+        getSubstitution,
+        encounteredSoFar
+      );
+      const right = substituteVariables(
+        term.right,
+        getSubstitution,
+        encounteredSoFar
+      );
+      return cerrMap2(left, right, (left, right) => ({
+        type: "application",
+        left,
+        right,
+      }));
+    case "unbound-variable":
+      const newEncounteredSoFar = new Set(encounteredSoFar);
+      if (newEncounteredSoFar.has(term.name)) {
+        return {
+          type: "failure",
+          error: [
+            {
+              why: `recursion found in definition '${term.name}'`,
+              type: "error",
+              pos: term.pos,
+            },
+          ],
+        };
+      }
+      const sub = getSubstitution(term.name);
+      if (sub) return sub;
+      return {
+        type: "failure",
+        error: [
+          {
+            why: `variable '${term.name}' does not exist`,
+            type: "error",
+            pos: term.pos,
+          },
+        ],
+      };
+  }
+}
+
+export function parseProgram(
+  input: string,
+  syntaxToAST: (input: string) => PartialParseProgram
+): CompilerResult<RunnableProgram> {
+  // try to parse input
+  const parsed = syntaxToAST(input);
+
+  const boundVariablesMap = new Map(
+    parsed
+      .map((e) =>
+        e.type == "definition"
+          ? [[e.name, addDiBrujinIndices(e.value)] as const]
+          : []
+      )
+      .flat(1)
+  );
+  const linkedBoundVariablesMap = new Map<string, CompilerResult<Term>>();
+
+  function getSubstitution(name: string): CompilerResult<Term> | undefined {
+    const linkedBoundVar = linkedBoundVariablesMap.get(name);
+    if (linkedBoundVar) return linkedBoundVar;
+    const boundVar = boundVariablesMap.get(name);
+    if (!boundVar) return undefined;
+    const sub = substituteVariables(boundVar, getSubstitution, new Set());
+    linkedBoundVariablesMap.set(name, sub);
+    return sub;
+  }
+
+  // create substitutions for all variables
+  for (const [name, term] of boundVariablesMap) {
+    if (linkedBoundVariablesMap.has(name)) continue;
+    const substitution = substituteVariables(term, getSubstitution, new Set());
+    linkedBoundVariablesMap.set(name, substitution);
+  }
+
+  const [statements, errors] = splitResultList(
+    [...linkedBoundVariablesMap.entries()].map(
+      ([name, result]): CompilerResult<{
+        name: string;
+        value: Term;
+      }> => {
+        if (result.type === "success") {
+          return {
+            type: "success",
+            value: { name, value: result.value },
+          };
+        }
+        return result;
+      }
+    )
+  );
+
+  if (errors.length > 0)
+    return {
+      type: "failure",
+      error: [...new Set(errors.flat(1))],
+    };
+
+  return {
+    type: "success",
+    value: new Map(statements.map((stmt) => [stmt.name, stmt.value] as const)),
+  };
+}
+
+export function mergeRunnablePrograms(...progs: RunnableProgram[]) {
+  const newProg: RunnableProgram = new Map();
+  for (const prog of progs) {
+    for (const [k, v] of prog) {
+      newProg.set(k, v);
+    }
+  }
+  return newProg;
 }
 
 export function printTerm(term: Term): string {

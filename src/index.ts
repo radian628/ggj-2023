@@ -1,4 +1,4 @@
-import * as compiler from "./lambda-calculus-compiler";
+import * as compiler from "./lambda-calculus-compiler.js";
 
 // @ts-expect-error
 globalThis.compiler = compiler;
